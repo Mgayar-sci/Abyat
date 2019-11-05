@@ -1,26 +1,52 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import TextField from "@material-ui/core/TextField";
+import { makeStyles } from "@material-ui/core/styles";
+import { CssBaseline, Container, Typography } from "@material-ui/core";
 
-function App() {
+const useStyles = makeStyles(theme => ({
+  container: {
+    display: "flex",
+    flexWrap: "wrap"
+  },
+  textField: {
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(1)
+  }
+}));
+
+export default function App() {
+  const classes = useStyles();
+  const [name, setName] = React.useState("");
+  const handleChange = event => {
+    setName(event.target.value);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+    <React.Fragment>
+      <CssBaseline />
+      <Container maxWidth="sm">
+        <Typography
+          component="div"
+          style={{ backgroundColor: "#cfe8fc", height: "100vh" }}
         >
-          Learn React
-        </a>
-      </header>
-    </div>
+          <form noValidate autoComplete="off">
+            <div className={classes.container}>
+              <TextField
+                id="standard-full-width"
+                label="Name"
+                style={{ margin: 20 }}
+                placeholder="Placeholder"
+                helperText="Full width!"
+                fullWidth
+                multiline
+                value={name}
+                onChange={handleChange}
+                margin="normal"
+              />
+            </div>
+          </form>
+        </Typography>
+      </Container>
+    </React.Fragment>
   );
 }
-
-export default App;
