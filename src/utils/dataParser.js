@@ -56,7 +56,7 @@ export function calcFormula(gameData, sport) {
       const score = sumVector(mulVectors(playerAttributes, formula));
       // console.log(score);
 
-      if (!score || !isNumber(score)) throw Error(i+2);
+      if (!score || !isNumber(score)) throw Error(i + 2);
 
       return {
         nickname: player[sport.nickname],
@@ -65,7 +65,6 @@ export function calcFormula(gameData, sport) {
       };
     });
   } catch (err) {
-      console.error(err.message);
     return { error: 12, line: err.message };
   }
 
@@ -79,6 +78,7 @@ export function getPlayersData(data, players, mvp) {
       teams[element.team] += element.score;
     else teams[element.team] = element.score;
   });
+  if (Object.keys(teams).length < 2) return { error: 13 };
 
   const winningTeam = Object.entries(teams).reduce((prev, cur) =>
     prev[1] > cur[1] ? prev[0] : cur[0]

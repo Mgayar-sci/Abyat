@@ -7,11 +7,7 @@ import { makeStyles } from "@material-ui/core/styles";
 
 import DenseTable from "./Components/DenseTable";
 
-import {
-  parseData,
-  calcFormula,
-  getPlayersData
-} from "./utils/dataParser";
+import { parseData, calcFormula, getPlayersData } from "./utils/dataParser";
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -42,20 +38,19 @@ export default function App() {
   const dataFieldRef = React.useRef(null);
   const classes = useStyles();
 
-
   const handleChange = event => {
     setData(event.target.value);
   };
   const analyzeData = event => {
     if (data) {
       const result = parseData(data);
-      if (result.error){
+      if (result.error) {
         setMessage(
           `Data is not valid!, error ${result.error} line: ${result.line &&
             result.line}`
         );
-        setResult(undefined);}
-      else {
+        setResult(undefined);
+      } else {
         setMessage("Success!");
         setResult(result);
       }
@@ -69,30 +64,44 @@ export default function App() {
   };
 
   const calculateMVP = event => {
-    if(!result || !result.gameData || !result.sport){
+    if (!result || !result.gameData || !result.sport) {
       setMessage(`Please analyze data first!`);
       setError(true);
       dataFieldRef.current.focus();
       return;
     }
     const newMatch = calcFormula(result.gameData, result.sport);
-    
-    if(!newMatch || newMatch.error){
-      setMessage(`Data is not valid!, error ${newMatch.error} line: ${newMatch.line &&
-        newMatch.line}`);
+
+    if (!newMatch || newMatch.error) {
+      setMessage(
+        `Data is not valid!, error ${newMatch.error} line: ${newMatch.line &&
+          newMatch.line}`
+      );
       setError(true);
       dataFieldRef.current.focus();
       return;
     }
 
-    const { teamsScores, playersScores, newMvp} = getPlayersData(newMatch, players, mvp);
+    const { teamsScores, playersScores, newMvp, error } = getPlayersData(
+      newMatch,
+      players,
+      mvp
+    );
+
+    if (error) {
+      setMessage(`Data is not valid!, error ${error}`);
+      setError(true);
+      dataFieldRef.current.focus();
+      return;
+    }
+
     setPlayers(playersScores);
     setTeams(teamsScores);
     setMvp(newMvp);
     setMessage("");
     setResult(undefined);
     setData("");
-  }
+  };
 
   return (
     <React.Fragment>
@@ -126,19 +135,29 @@ export default function App() {
               className={classes.button}
               onClick={analyzeData}
             >
-              Analyze data
+              Analyze data shape
             </Button>
-          {result && <DenseTable data={result.gameData} headers={result.sport.fields} array/>}
+            {result && (
+              <DenseTable
+                data={result.gameData}
+                headers={result.sport.fields}
+                array
+              />
+            )}
             <Button
               variant="contained"
               className={classes.button}
               onClick={calculateMVP}
             >
-              Calculate MVP
+              Deep analysis and Calculate MVP
             </Button>
           </form>
-          <DenseTable data={teams} headers={["Team Name", "Score"]}/>
-          <DenseTable data={players} headers={["Player Nickname", "Score"]} highlight={mvp.nickname}/>
+          <DenseTable data={teams} headers={["Team Name", "Score"]} />
+          <DenseTable
+            data={players}
+            headers={["Player Nickname", "Score"]}
+            highlight={mvp.nickname}
+          />
         </Typography>
       </Container>
     </React.Fragment>
