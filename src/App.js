@@ -41,63 +41,61 @@ export default function App() {
   const handleChange = event => {
     setData(event.target.value);
   };
+
+  const handleError = msg => {
+    setMessage(msg);
+    setError(true);
+    dataFieldRef.current.focus();
+  };
+
   const analyzeData = event => {
+    setResult(undefined);
     if (data) {
       const result = parseData(data);
-      if (result.error) {
-        setMessage(
+      if (!result.error) {
+        setMessage("Success!");
+        setError(false);
+        setResult(result);
+      } else {
+        handleError(
           `Data is not valid!, error ${result.error} line: ${result.line &&
             result.line}`
         );
-        setResult(undefined);
-      } else {
-        setMessage("Success!");
-        setResult(result);
       }
-      setError(!!result.error);
     } else {
-      setMessage(`Data is not valid!`);
-      setError(true);
-      setResult(undefined);
-      dataFieldRef.current.focus();
+      handleError(`Data is not valid!`);
     }
   };
 
   const calculateMVP = event => {
     if (!result || !result.gameData || !result.sport) {
-      setMessage(`Please analyze data first!`);
-      setError(true);
-      dataFieldRef.current.focus();
+      handleError(`Please analyze data first!`);
       return;
     }
     const newMatch = calcFormula(result.gameData, result.sport);
 
     if (!newMatch || newMatch.error) {
-      setMessage(
+      handleError(
         `Data is not valid!, error ${newMatch.error} line: ${newMatch.line &&
-          newMatch.line}`
+          newMatch.line}, ${newMatch.msg}`
       );
-      setError(true);
-      dataFieldRef.current.focus();
       return;
     }
 
-    const { teamsScores, playersScores, newMvp, error } = getPlayersData(
+    const { teamsScores, playersScores, newMVP, error } = getPlayersData(
       newMatch,
       players,
       mvp
     );
 
     if (error) {
-      setMessage(`Data is not valid!, error ${error}`);
-      setError(true);
-      dataFieldRef.current.focus();
+      handleError(`Data is not valid!, error ${error}`);
       return;
     }
 
     setPlayers(playersScores);
     setTeams(teamsScores);
-    setMvp(newMvp);
+    setMvp(newMVP);
     setMessage("");
     setResult(undefined);
     setData("");
