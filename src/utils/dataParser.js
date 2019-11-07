@@ -1,5 +1,56 @@
 import { dataShapes } from "../conf/datashapes";
 
+export function simpleTest() {
+  const data = [
+    `BASKETBALL
+  player 1;nick1;4;Team A;G;10;2;7
+  player 2;nick2;8;Team A;F;0;10;0
+  player 3;nick3;15;Team A;C;15;10;4
+  player 4;nick4;16;Team B;G;20;0;0
+  player 5;nick5;23;Team B;F;4;7;7
+  player 6;nick6;42;Team B;C;8;10;0
+  `,
+  `HANDBALL
+player 1;nick1;4;Team A;G;0;20
+player 2;nick2;8;Team A;F;15;20
+player 3;nick3;15;Team A;F;10;20
+player 4;nick4;16;Team B;G;1;25
+player 5;nick5;23;Team B;F;12;25
+player 6;nick6;42;Team B;F;8;25`
+  ];
+
+  let players = [];
+  let mvp = { nickname: "", score: 0 };
+  console.log(players, mvp);
+
+  data.map(d=>console.log(test(d, players, mvp)));
+
+  console.log(players, mvp);
+}
+
+function test(data, players, mvp) {
+  const result = parseData(data);
+  if (result.error)
+    throw Error(
+      `Data is not valid!, error ${result.error} line: ${result.line &&
+        result.line}`
+    );
+
+  const newMatch = calcFormula(result.gameData, result.sport);
+  if (newMatch.error)
+    throw Error(
+      `Data is not valid!, error ${newMatch.error} line: ${newMatch.line &&
+        newMatch.line}, ${newMatch.msg}`
+    );
+
+  const playersData = getPlayersData(newMatch, players, mvp);
+
+  if (playersData.error)
+    throw Error(`Data is not valid!, error ${playersData.error}`);
+
+  return playersData;
+}
+
 /**
  * Parses one file data as string and returns an array of game data and the parsed sport configuration
  * @param {string} data data string for single file
@@ -72,7 +123,7 @@ export function calcFormula(gameData, sport) {
     !sport.team ||
     !sport.formula.fields
   )
-    return { error: 10 , msg:"sport is not valid!"};
+    return { error: 10, msg: "sport is not valid!" };
 
   // check for game data object data integrity
   if (
@@ -80,7 +131,7 @@ export function calcFormula(gameData, sport) {
     gameData.length < 2 ||
     gameData[0].length !== sport.fields.length
   )
-    return { error: 11 , msg:"Gamedata is not valid!"};
+    return { error: 11, msg: "Gamedata is not valid!" };
 
   let scores = {};
   try {

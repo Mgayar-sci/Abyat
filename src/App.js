@@ -7,7 +7,12 @@ import { makeStyles } from "@material-ui/core/styles";
 
 import DenseTable from "./Components/DenseTable";
 
-import { parseData, calcFormula, getPlayersData } from "./utils/dataParser";
+import {
+  parseData,
+  calcFormula,
+  getPlayersData,
+  simpleTest
+} from "./utils/dataParser";
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -27,6 +32,9 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function App() {
+  // this is just for dry testing
+  React.useEffect(simpleTest, []);
+
   const [message, setMessage] = React.useState("");
   const [error, setError] = React.useState(false);
   const [data, setData] = React.useState("");
