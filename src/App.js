@@ -1,18 +1,12 @@
-import React from "react";
-import { CssBaseline, Container, Typography } from "@material-ui/core";
+import React, { useEffect, useRef, useState } from "react";
+import { CssBaseline, Container, Typography, Box } from "@material-ui/core";
 
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import { makeStyles } from "@material-ui/core/styles";
 
-import DenseTable from "./Components/DenseTable";
+import ProgressBar from './Components/ProgressBar';
 
-import {
-  parseData,
-  calcFormula,
-  getPlayersData,
-  simpleTest
-} from "./utils/dataParser";
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -22,32 +16,45 @@ const useStyles = makeStyles(theme => ({
   textField: {
     marginLeft: theme.spacing(1),
     marginRight: theme.spacing(1)
-  },
-  button: {
-    margin: theme.spacing(1)
-  },
-  input: {
-    display: "none"
   }
 }));
 
 export default function App() {
-  // this is just for dry testing
-  React.useEffect(simpleTest, []);
+  const rate = 20;
 
-  const [message, setMessage] = React.useState("");
-  const [error, setError] = React.useState(false);
-  const [data, setData] = React.useState("");
-  const [players, setPlayers] = React.useState({});
-  const [teams, setTeams] = React.useState({});
-  const [result, setResult] = React.useState(undefined);
-  const [mvp, setMvp] = React.useState({ nickname: "", score: 0 });
+  const getInitialData = () => {
+    let initData = JSON.parse(localStorage.getItem("data"));
+    if (!initData) {
+      initData = {
+        "Math": { max: 300, page: 169 },
+        "Arabic": { max: 304, page: 144 },
+        "English": { max: 223, page: 77 }
+      }
+      localStorage.setItem("data", JSON.stringify(initData));
+    }
+    return initData;
+  }
 
-  const dataFieldRef = React.useRef(null);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState(false);
+  const [data, setData] = useState(getInitialData());
+
+  const dataFieldRef = useRef(null);
   const classes = useStyles();
 
-  const handleChange = event => {
-    setData(event.target.value);
+  useEffect(() => {
+    console.log(`data`, data);
+    localStorage.setItem("data", JSON.stringify(data));
+  }, [data])
+
+  const handlePageChange = (key, event) => {
+    const page = event.target.value
+    setData({ ...data, [key]: { max: data[key].max, page, days: Math.ceil((data[key].max - page) / rate) } });
+  };
+
+  const handleMaxChange = (key, event) => {
+    const max = event.target.value
+    setData({ ...data, [key]: { max, page: data[key].page, days: Math.ceil((max - data[key].page) / rate) } });
   };
 
   const handleError = msg => {
@@ -56,115 +63,53 @@ export default function App() {
     dataFieldRef.current.focus();
   };
 
-  const analyzeData = event => {
-    setResult(undefined);
-    if (data) {
-      const result = parseData(data);
-      if (!result.error) {
-        setMessage("Success!");
-        setError(false);
-        setResult(result);
-      } else {
-        handleError(
-          `Data is not valid!, error ${result.error} line: ${result.line &&
-            result.line}`
-        );
-      }
-    } else {
-      handleError(`Data is not valid!`);
-    }
-  };
-
-  const calculateMVP = event => {
-    if (!result || !result.gameData || !result.sport) {
-      handleError(`Please analyze data first!`);
-      return;
-    }
-    const newMatch = calcFormula(result.gameData, result.sport);
-
-    if (!newMatch || newMatch.error) {
-      handleError(
-        `Data is not valid!, error ${newMatch.error} line: ${newMatch.line &&
-          newMatch.line}, ${newMatch.msg}`
-      );
-      return;
-    }
-
-    const { teamsScores, playersScores, newMVP, error } = getPlayersData(
-      newMatch,
-      players,
-      mvp
-    );
-
-    if (error) {
-      handleError(`Data is not valid!, error ${error}`);
-      return;
-    }
-
-    setPlayers(playersScores);
-    setTeams(teamsScores);
-    setMvp(newMVP);
-    setMessage("");
-    setResult(undefined);
-    setData("");
-  };
-
   return (
     <React.Fragment>
       <CssBaseline />
       <Container maxWidth="md">
-        <Typography
-          component="div"
-          style={{ backgroundColor: "#cfe8fc", height: "100vh" }}
-        >
-          <form noValidate autoComplete="off">
+        {Object.keys(data).map(key =>
+          <Typography
+            key={key}
+            component="div"
+            style={{ backgroundColor: "#cfe8fc" }}
+          >
             <div className={classes.container}>
               <TextField
-                id="standard-full-width"
-                label="Data"
-                style={{ margin: 20 }}
-                placeholder="Please paste your data here"
+                id="outlined-basic-size-small"
+                style={{ margin: 10, maxWidth: 80 }}
+                placeholder="Page"
                 helperText={message}
                 error={error}
-                fullWidth
-                multiline
-                value={data}
-                onChange={handleChange}
-                margin="normal"
+                type="number"
+                variant="outlined"
+                value={data[key].page}
+                onChange={e => handlePageChange(key, e)}
+                margin="dense"
                 inputRef={dataFieldRef}
                 autoFocus
-                required
               />
+              <Box marginTop={2.5}>
+                <Typography>of</Typography>
+              </Box>
+              <TextField
+                id="standard-full-width"
+                style={{ margin: 10, maxWidth: 80 }}
+                placeholder="Max"
+                helperText={message}
+                error={error}
+                type="number"
+                variant="outlined"
+                value={data[key].max}
+                onChange={e => handleMaxChange(key, e)}
+                margin="dense"
+                inputRef={dataFieldRef}
+              />
+              <Box marginTop={2.5}>
+                <Typography>{Math.ceil((data[key].max - data[key].page) / rate)} days</Typography>
+              </Box>
             </div>
-            <Button
-              variant="contained"
-              className={classes.button}
-              onClick={analyzeData}
-            >
-              Analyze data shape
-            </Button>
-            {result && (
-              <DenseTable
-                data={result.gameData}
-                headers={result.sport.fields}
-                array
-              />
-            )}
-            <Button
-              variant="contained"
-              className={classes.button}
-              onClick={calculateMVP}
-            >
-              Deep analysis and Calculate MVP
-            </Button>
-          </form>
-          <DenseTable data={teams} headers={["Team Name", "Score"]} />
-          <DenseTable
-            data={players}
-            headers={["Player Nickname", "Score"]}
-            highlight={mvp.nickname}
-          />
-        </Typography>
+            <ProgressBar name={key} max={data[key].max} value={data[key].page} />
+          </Typography>)}
       </Container>
     </React.Fragment>
   );
