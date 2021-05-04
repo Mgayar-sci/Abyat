@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { CssBaseline, Container, Typography, Box } from "@material-ui/core";
 
 import TextField from "@material-ui/core/TextField";
-import Button from "@material-ui/core/Button";
 import { makeStyles } from "@material-ui/core/styles";
 
 import ProgressBar from './Components/ProgressBar';
@@ -35,8 +34,8 @@ export default function App() {
     return initData;
   }
 
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState(false);
+  // const [message, setMessage] = useState("");
+  // const [error, setError] = useState(false);
   const [data, setData] = useState(getInitialData());
 
   const dataFieldRef = useRef(null);
@@ -57,11 +56,11 @@ export default function App() {
     setData({ ...data, [key]: { max, page: data[key].page, days: Math.ceil((max - data[key].page) / rate) } });
   };
 
-  const handleError = msg => {
-    setMessage(msg);
-    setError(true);
-    dataFieldRef.current.focus();
-  };
+  // const handleError = msg => {
+  //   setMessage(msg);
+  //   setError(true);
+  //   dataFieldRef.current.focus();
+  // };
 
   return (
     <React.Fragment>
@@ -78,8 +77,8 @@ export default function App() {
                 id="outlined-basic-size-small"
                 style={{ margin: 10, maxWidth: 75 }}
                 placeholder="Page"
-                helperText={message}
-                error={error}
+                // helperText={message}
+                // error={error}
                 type="number"
                 variant="outlined"
                 value={data[key].page}
@@ -95,8 +94,8 @@ export default function App() {
                 id="standard-full-width"
                 style={{ margin: 10, maxWidth: 75 }}
                 placeholder="Max"
-                helperText={message}
-                error={error}
+                // helperText={message}
+                // error={error}
                 type="number"
                 variant="outlined"
                 value={data[key].max}
