@@ -76,7 +76,7 @@ export default function App() {
             <div className={classes.container}>
               <TextField
                 id="outlined-basic-size-small"
-                style={{ margin: 10, maxWidth: 80 }}
+                style={{ margin: 10, maxWidth: 75 }}
                 placeholder="Page"
                 helperText={message}
                 error={error}
@@ -93,7 +93,7 @@ export default function App() {
               </Box>
               <TextField
                 id="standard-full-width"
-                style={{ margin: 10, maxWidth: 80 }}
+                style={{ margin: 10, maxWidth: 75 }}
                 placeholder="Max"
                 helperText={message}
                 error={error}
@@ -104,8 +104,9 @@ export default function App() {
                 margin="dense"
                 inputRef={dataFieldRef}
               />
-              <Box marginTop={2.5}>
+              <Box marginTop={0.5}>
                 <Typography>{Math.ceil((data[key].max - data[key].page) / rate)} days</Typography>
+                <Typography>{Math.ceil((data[key].max - data[key].page))} pages</Typography>
               </Box>
             </div>
             <ProgressBar name={key} max={data[key].max} value={data[key].page} />

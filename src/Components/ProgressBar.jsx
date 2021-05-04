@@ -4,6 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 function LinearProgressWithLabel(props) {
   return (
@@ -23,12 +24,47 @@ function LinearProgressWithLabel(props) {
   );
 }
 
+function CircularProgressWithLabel(props) {
+    return (
+      <Box position="relative" display="inline-flex">
+        <Box minWidth={60} margin={1}>
+            <Typography variant="body2" color="textSecondary">{props.name}</Typography>
+        </Box>
+        <CircularProgress variant="determinate" {...props} />
+        <Box
+          top={0}
+          left={0}
+          bottom={0}
+          right={0}
+          position="absolute"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Typography variant="caption" component="div" color="textSecondary">{`${Math.round(
+            props.value,
+          )}%`}</Typography>
+        </Box>
+      </Box>
+    );
+  }
+
+  CircularProgressWithLabel.propTypes = {
+    /**
+     * The value of the progress indicator for the determinate and buffer variants.
+     * Value between 0 and 100.
+     */
+    value: PropTypes.number.isRequired,
+    name: PropTypes.string.isRequired,
+  }
+
 LinearProgressWithLabel.propTypes = {
   /**
    * The value of the progress indicator for the determinate and buffer variants.
    * Value between 0 and 100.
    */
   value: PropTypes.number.isRequired,
+  name: PropTypes.string.isRequired,
 };
 
 const useStyles = makeStyles({
@@ -57,6 +93,7 @@ export default function LinearWithValueLabel(props) {
   return (
     <div className={classes.root}>
       <LinearProgressWithLabel value={progress} name={name} />
+      {/* <CircularProgressWithLabel value={progress} name={name} /> */}
     </div>
   );
 }
