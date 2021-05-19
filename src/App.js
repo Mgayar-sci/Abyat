@@ -5,12 +5,16 @@ import TextField from "@material-ui/core/TextField";
 import { makeStyles } from "@material-ui/core/styles";
 
 import ProgressBar from './Components/ProgressBar';
+import SimpleAccordion from "./Components/SimpleAccordion";
+import InfoBox from "./Components/InfoBox";
+import Settings from "./Components/Settings";
 
 
 const useStyles = makeStyles(theme => ({
   container: {
     display: "flex",
-    flexWrap: "wrap"
+    // margin: theme.spacing(1),
+    // flexWrap: "wrap"
   },
   textField: {
     marginLeft: theme.spacing(1),
@@ -19,7 +23,6 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function App() {
-  const rate = 20;
 
   const getInitialData = () => {
     let initData = JSON.parse(localStorage.getItem("data"));
@@ -34,12 +37,27 @@ export default function App() {
     return initData;
   }
 
+
+  const getInitialSettings = () => {
+    let initSettings = JSON.parse(localStorage.getItem("settings"));
+    if (!initSettings) {
+      initSettings = { Rate: 20, Days: 5 };
+      localStorage.setItem("settings", JSON.stringify(initSettings));
+    }
+    return initSettings;
+  }
+
   // const [message, setMessage] = useState("");
   // const [error, setError] = useState(false);
   const [data, setData] = useState(getInitialData());
+  const [settings, setSettings] = useState(getInitialSettings());
 
   const dataFieldRef = useRef(null);
   const classes = useStyles();
+
+  useEffect(() => {
+    localStorage.setItem("settings", JSON.stringify(settings));
+  }, [settings])
 
   useEffect(() => {
     console.log(`data`, data);
@@ -48,13 +66,35 @@ export default function App() {
 
   const handlePageChange = (key, event) => {
     const page = parseInt(event.target.value)
-    setData({ ...data, [key]: { max: data[key].max, page, days: Math.ceil((data[key].max - page) / rate) } });
+    setData({ ...data, [key]: { max: data[key].max, page, days: Math.ceil((data[key].max - page) / settings.Rate) } });
   };
 
   const handleMaxChange = (key, event) => {
     const max = parseInt(event.target.value)
-    setData({ ...data, [key]: { max, page: data[key].page, days: Math.ceil((max - data[key].page) / rate) } });
+    setData({ ...data, [key]: { max, page: data[key].page, days: Math.ceil((max - data[key].page) / settings.Rate) } });
   };
+
+  const getWeekDay = (day) => {
+    switch (day) {
+      case 0:
+        return "Saturday";
+      case 1:
+        return "Sunday";
+      case 2:
+        return "Monday";
+      case 3:
+        return "Tuesday";
+      case 4:
+        return "Wednesday";
+      case 5:
+        return "Thursday";
+      case 6:
+        return "Friday";
+
+      default:
+        return "Saturday";
+    }
+  }
 
   // const handleError = msg => {
   //   setMessage(msg);
@@ -63,21 +103,29 @@ export default function App() {
   // };
 
   const total = Object.values(data).reduce(((a, c) => { a.max += c.max; a.page += c.page; return a; }), { max: 0, page: 0 });
+  const pages = (total.max - total.page);
+  const days = Math.ceil((total.max - total.page) / settings.Rate) % settings.Days;
+  const weeks = Math.floor(Math.ceil((total.max - total.page) / settings.Rate) / settings.Days);
+
+  let date = new Date();
+  date.setDate(date.getDate() + weeks * 7 + days);
+  const weekDay = getWeekDay(date.getDay());
 
   return (
     <React.Fragment>
       <CssBaseline />
       <Container maxWidth="md">
-        {Object.keys(data).map(key =>
+        <SimpleAccordion components={[{ name: "Settings", text: `Rate: ${settings.Rate} - Days: ${settings.Days}`, Component: () => (<Settings updateSettings={setSettings} settings={settings} />) }]} />
+        {Object.keys(data).map((key, index) =>
           <Typography
             key={key}
             component="div"
-            style={{ backgroundColor: "#cfe8fc" }}
+            style={{ backgroundColor: "#cfe8fc", marginBottom: 2, padding: 2 }}
           >
             <div className={classes.container}>
               <TextField
                 id="outlined-basic-size-small"
-                style={{ margin: 10, maxWidth: 75 }}
+                style={{ margin: 5, marginTop: 10, maxWidth: 75 }}
                 placeholder="Page"
                 // helperText={message}
                 // error={error}
@@ -87,14 +135,14 @@ export default function App() {
                 onChange={e => handlePageChange(key, e)}
                 margin="dense"
                 inputRef={dataFieldRef}
-                autoFocus
+                autoFocus={index === 0}
               />
               <Box marginTop={2.5}>
                 <Typography>of</Typography>
               </Box>
               <TextField
                 id="standard-full-width"
-                style={{ margin: 10, maxWidth: 75 }}
+                style={{ margin: 5, marginTop: 10, maxWidth: 75 }}
                 placeholder="Max"
                 // helperText={message}
                 // error={error}
@@ -105,26 +153,43 @@ export default function App() {
                 margin="dense"
                 inputRef={dataFieldRef}
               />
-              <Box marginTop={0.5}>
-                <Typography>{Math.ceil((data[key].max - data[key].page) / rate)} days</Typography>
-                <Typography>{Math.ceil((data[key].max - data[key].page))} pages</Typography>
+              <Box width="100%" display="flex" flexDirection="column" justifyContent="center" alignItems="flex-end">
+                <InfoBox
+                  first={Math.ceil((data[key].max - data[key].page) / settings.Rate)}
+                  last="days" />
+                <InfoBox
+                  first={Math.ceil((data[key].max - data[key].page))}
+                  last="pages" />
               </Box>
+              {/* </div> */}
             </div>
             <ProgressBar name={key} max={data[key].max} value={data[key].page} />
           </Typography>)}
-      </Container>
-      <Container maxWidth="md">
         <Typography
           component="div"
-          style={{display: "flex", alignItems: "center", backgroundColor: "#cfaafc"}}
+          style={{ display: "flex", alignItems: "center", backgroundColor: "#cfaafc" }}
         >
           <ProgressBar name={"Total"} max={total.max} value={total.page} />
-          <Box minWidth={80} maxWidth={100}>
-            <Typography style={{textAlign:"center"}}>
-              {Math.ceil((total.max - total.page) / rate)} days
-            <br />
-              {Math.ceil((total.max - total.page))} pages
-            </Typography>
+          <Box display="flex" flexDirection="column" justifyContent="center" alignItems="flex-end">
+            <InfoBox
+              first={weeks}
+              last="weeks" />
+            <InfoBox
+              first={days}
+              last="days" />
+          </Box>
+        </Typography>
+        <Typography
+          component="div"
+          style={{ display: "flex", justifyContent: "center", backgroundColor: "#cfaafc" }}
+        >
+          <Box display="flex" justifyContent="space-between" width="100%">
+          <InfoBox
+              first={pages}
+              last="pages" />
+            <InfoBox
+              first={weekDay}
+              last={date.toLocaleDateString()} />
           </Box>
         </Typography>
       </Container>
