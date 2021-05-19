@@ -47,12 +47,12 @@ export default function App() {
   }, [data])
 
   const handlePageChange = (key, event) => {
-    const page = event.target.value
+    const page = parseInt(event.target.value)
     setData({ ...data, [key]: { max: data[key].max, page, days: Math.ceil((data[key].max - page) / rate) } });
   };
 
   const handleMaxChange = (key, event) => {
-    const max = event.target.value
+    const max = parseInt(event.target.value)
     setData({ ...data, [key]: { max, page: data[key].page, days: Math.ceil((max - data[key].page) / rate) } });
   };
 
@@ -61,6 +61,8 @@ export default function App() {
   //   setError(true);
   //   dataFieldRef.current.focus();
   // };
+
+  const total = Object.values(data).reduce(((a, c) => { a.max += c.max; a.page += c.page; return a; }), { max: 0, page: 0 });
 
   return (
     <React.Fragment>
@@ -110,6 +112,21 @@ export default function App() {
             </div>
             <ProgressBar name={key} max={data[key].max} value={data[key].page} />
           </Typography>)}
+      </Container>
+      <Container maxWidth="md">
+        <Typography
+          component="div"
+          style={{display: "flex", alignItems: "center", backgroundColor: "#cfaafc"}}
+        >
+          <ProgressBar name={"Total"} max={total.max} value={total.page} />
+          <Box minWidth={80} maxWidth={100}>
+            <Typography style={{textAlign:"center"}}>
+              {Math.ceil((total.max - total.page) / rate)} days
+            <br />
+              {Math.ceil((total.max - total.page))} pages
+            </Typography>
+          </Box>
+        </Typography>
       </Container>
     </React.Fragment>
   );
