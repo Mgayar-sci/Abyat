@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { CssBaseline, Container, Typography, Box, Button } from "@material-ui/core";
+import { CssBaseline, Container, Typography, Box, Button, IconButton } from "@material-ui/core";
 
 import TextField from "@material-ui/core/TextField";
 import { makeStyles } from "@material-ui/core/styles";
@@ -8,6 +8,7 @@ import ProgressBar from './Components/ProgressBar';
 import SimpleAccordion from "./Components/SimpleAccordion";
 import InfoBox from "./Components/InfoBox";
 import Settings from "./Components/Settings";
+import DeleteIcon from '@material-ui/icons/Delete';
 
 
 const useStyles = makeStyles(theme => ({
@@ -78,6 +79,19 @@ export default function App() {
     const subjectName = prompt("Enter new subject name","NewSubject" + Object.keys(data).length);
     if(subjectName && !data.hasOwnProperty(subjectName)){
       setData({...data, [subjectName]:{max:1,page:1}});
+    }
+  }
+
+  const removeSubject = (key) => {
+    if(!data.hasOwnProperty(key)){
+      alert("Invalid subject name!");
+    }else {
+    // eslint-disable-next-line no-restricted-globals
+      const sure = confirm("Are you sure you want to delete "+ key + "?");
+      if(sure){
+        const {[key]:tmp, ...rest} = data;
+        setData(rest);
+      }
     }
   }
 
@@ -160,13 +174,18 @@ export default function App() {
                 margin="dense"
                 inputRef={dataFieldRef}
               />
-              <Box width="100%" display="flex" flexDirection="column" justifyContent="center" alignItems="flex-end">
+              <Box width="100%" display="flex" flexDirection="rows" justifyContent="flex-end">
+              <IconButton onClick={()=>removeSubject(key)}>
+                <DeleteIcon/>
+              </IconButton>
+              <Box display="flex" flexDirection="column" justifyContent="center" alignItems="flex-end">
                 <InfoBox
                   first={Math.ceil((data[key].max - data[key].page) / settings.Rate)}
                   last="days" />
                 <InfoBox
                   first={Math.ceil((data[key].max - data[key].page))}
                   last="pages" />
+              </Box>
               </Box>
               {/* </div> */}
             </div>
