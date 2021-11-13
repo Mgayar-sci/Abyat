@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { CssBaseline, Container, Typography, Box } from "@material-ui/core";
+import { CssBaseline, Container, Typography, Box, Button } from "@material-ui/core";
 
 import TextField from "@material-ui/core/TextField";
 import { makeStyles } from "@material-ui/core/styles";
@@ -73,6 +73,13 @@ export default function App() {
     const max = parseInt(event.target.value)
     setData({ ...data, [key]: { max, page: data[key].page, days: Math.ceil((max - data[key].page) / settings.Rate) } });
   };
+
+  const addNewSubject = () => {
+    const subjectName = prompt("Enter new subject name","NewSubject" + Object.keys(data).length);
+    if(subjectName && !data.hasOwnProperty(subjectName)){
+      setData({...data, [subjectName]:{max:1,page:1}});
+    }
+  }
 
   const getWeekDay = (day) => {
     switch (day) {
@@ -165,6 +172,12 @@ export default function App() {
             </div>
             <ProgressBar name={key} max={data[key].max} value={data[key].page} />
           </Typography>)}
+        <Typography
+          component="div"
+          style={{ display: "flex", justifyContent: "center", margin: 10}}
+        >
+          <Button variant="contained" color="primary" onClick={addNewSubject}>+Add</Button>
+        </Typography>
         <Typography
           component="div"
           style={{ display: "flex", alignItems: "center", backgroundColor: "#cfaafc" }}
