@@ -29,6 +29,8 @@ export default function Settings({settings, updateSettings}) {
 
   const handleChange = (event) => {
     let value = parseInt(event.target.value);
+    
+    if(!isFinite(value)) return;
     const key = event.target.name;
     if(key === "Days")
         value = value > 7? 7: value<1?1:value;
@@ -37,7 +39,7 @@ export default function Settings({settings, updateSettings}) {
   return (
     <Box display="flex">
       <SettingsFields fields={fields} handleChange={handleChange} />
-      <Button color="primary" onClick={e=>updateSettings(fields)}>Save</Button>
+      <Button color="primary" onClick={()=>updateSettings(fields)}>Save</Button>
     </Box>
   );
 }
